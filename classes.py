@@ -1,20 +1,31 @@
 from typing import List, Optional
+import json
 
 class Animal:
     def __init__(self, id: int, name: str, species: str, age: int):
-        self.id = id
-        self.name = name
-        self.species = species
-        self.age = age
+        try:
+            if age < 0:
+                raise ValueError("Возраст не может быть отрицательным.")
+            self.id = id
+            self.name = name
+            self.species = species
+            self.age = age
+        except ValueError as e:
+            print(f"Ошибка инициализации животного: {e}")
 
     def __str__(self):
         return f"{self.name} ({self.species}, {self.age} years old)"
 
     def eat(self, food: str):
-        print(f"{self.name} ест {food}")
+        try:
+            if not food:
+                raise ValueError("Пища не указана.")
+            print(f"{self.name} ест {food}.")
+        except ValueError as e:
+            print(f"Ошибка: {e}")
 
     def sleep(self):
-        print(f"{self.name} спит")
+        print(f"{self.name} спит.")
 
 class Shelter:
     def __init__(self, id: int, name: str, address: str, capacity: int):
@@ -22,29 +33,35 @@ class Shelter:
         self.name = name
         self.address = address
         self.capacity = capacity
-        self.animals: List[Animal] = []  # Список животных в приюте
+        self.animals: List[Animal] = []
 
     def admit_animal(self, animal: Animal) -> bool:
-        if len(self.animals) < self.capacity:
+        try:
+            if len(self.animals) >= self.capacity:
+                raise OverflowError(f"Приют '{self.name}' переполнен.")
             self.animals.append(animal)
             print(f"Животное {animal.name} принято в приют '{self.name}'.")
             return True
-        else:
-            print(f"Приют '{self.name}' переполнен. Животное {animal.name} не может быть принято.")
+        except OverflowError as e:
+            print(f"Ошибка: {e}")
             return False
 
     def release_animal(self, animal_id: int) -> Optional[Animal]:
-        for animal in self.animals:
-            if animal.id == animal_id:
-                self.animals.remove(animal)
-                print(f"Животное {animal.name} выпущено из приюта '{self.name}'.")
-                return animal
-        print(f"Животное с ID {animal_id} не найдено в приюте '{self.name}'.")
-        return None
+        try:
+            for animal in self.animals:
+                if animal.id == animal_id:
+                    self.animals.remove(animal)
+                    print(f"Животное {animal.name} выпущено из приюта.")
+                    return animal
+            raise ValueError(f"Животное с ID {animal_id} не найдено.")
+        except ValueError as e:
+            print(f"Ошибка: {e}")
+            return None
 
     def list_animals(self):
+        print(f"Список животных в приюте '{self.name}':")
         if self.animals:
-            print(f"Список животных в приюте '{self.name}':")
+            print(f"Животные в приюте '{self.name}':")
             for animal in self.animals:
                 print(f"- {animal}")
         else:
