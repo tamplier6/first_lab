@@ -1,6 +1,12 @@
 from typing import List, Optional
 import json
 
+# Собственное исключение для переполнения приюта
+class ShelterOverflowError(Exception):
+    def __init__(self, message="Приют переполнен. Невозможно добавить больше животных."):
+        super().__init__(message)
+
+
 class Animal:
     def __init__(self, id: int, name: str, species: str, age: int):
         try:
@@ -38,11 +44,11 @@ class Shelter:
     def admit_animal(self, animal: Animal) -> bool:
         try:
             if len(self.animals) >= self.capacity:
-                raise OverflowError(f"Приют '{self.name}' переполнен.")
+                raise ShelterOverflowError
             self.animals.append(animal)
             print(f"Животное {animal.name} принято в приют '{self.name}'.")
             return True
-        except OverflowError as e:
+        except ShelterOverflowError as e:
             print(f"Ошибка: {e}")
             return False
 
@@ -112,3 +118,19 @@ class Veterinarian:
     def perform_checkup(self, animal: Animal):
         print(f"Ветеринар {self.name} проводит осмотр животного {animal.name}.")
 
+# Функции для работы с JSON
+def save_to_json(filename: str, data: dict):
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+    print(f"Данные сохранены в файл {filename}.")
+
+
+def load_from_json(filename: str) -> Optional[dict]:
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Файл {filename} не найден.")
+    except json.JSONDecodeError as e:
+        print(f"Ошибка чтения JSON: {e}")
+    return None
